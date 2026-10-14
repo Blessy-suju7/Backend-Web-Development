@@ -37,7 +37,7 @@ async function create(fields) {
       data: {
         title: fields.title,
         body: fields.body || '',
-        authorId: Number(fields.authorId),
+        authorId: fields.authorId,
       },
     });
   } catch (error) {
@@ -56,8 +56,8 @@ async function update(id, patch) {
   try {
     return await prisma.post.update({ where: { id: postId }, data });
   } catch (error) {
-    if (error.code === 'P2025') return null;
-    throw error;
+    if (error && error.code === 'P2025') return null;
+    handleDatabaseError(error);
   }
 }
 
@@ -69,8 +69,8 @@ async function remove(id) {
     await prisma.post.delete({ where: { id: postId } });
     return true;
   } catch (error) {
-    if (error.code === 'P2025') return false;
-    throw error;
+    if (error && error.code === 'P2025') return false;
+    handleDatabaseError(error);
   }
 }
 

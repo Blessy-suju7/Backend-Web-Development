@@ -15,8 +15,8 @@ async function createPost(fields) {
     throw error;
   }
 
-  if (fields.authorId === undefined || fields.authorId === null || fields.authorId === '') {
-    const error = new Error('Author is required');
+  if (!Number.isInteger(fields.authorId) || fields.authorId <= 0 || fields.authorId > 2147483647) {
+    const error = new Error('Author must be a positive integer');
     error.statusCode = 422;
     throw error;
   }
@@ -24,7 +24,7 @@ async function createPost(fields) {
   return postRepository.create({
     title: fields.title,
     body: fields.body || '',
-    authorId: Number(fields.authorId),
+    authorId: fields.authorId,
   });
 }
 
