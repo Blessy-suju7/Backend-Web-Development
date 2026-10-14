@@ -37,7 +37,7 @@ async function create(fields) {
       data: {
         title: fields.title,
         body: fields.body || '',
-        authorId: fields.authorId,
+        authorId: Number(fields.authorId),
       },
     });
   } catch (error) {
