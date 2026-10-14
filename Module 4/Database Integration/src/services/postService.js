@@ -14,10 +14,17 @@ async function createPost(fields) {
     error.statusCode = 422;
     throw error;
   }
+
+  if (fields.authorId === undefined || fields.authorId === null || fields.authorId === '') {
+    const error = new Error('Author is required');
+    error.statusCode = 422;
+    throw error;
+  }
+
   return postRepository.create({
     title: fields.title,
     body: fields.body || '',
-    authorId: fields.authorId,
+    authorId: Number(fields.authorId),
   });
 }
 
