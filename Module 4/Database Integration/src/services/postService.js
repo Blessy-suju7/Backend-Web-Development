@@ -14,6 +14,13 @@ async function createPost(fields) {
     error.statusCode = 422;
     throw error;
   }
+
+  if (!Number.isInteger(fields.authorId) || fields.authorId <= 0 || fields.authorId > 2147483647) {
+    const error = new Error('Author must be a positive integer');
+    error.statusCode = 422;
+    throw error;
+  }
+
   return postRepository.create({
     title: fields.title,
     body: fields.body || '',
