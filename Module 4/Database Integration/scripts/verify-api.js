@@ -52,8 +52,6 @@ async function main() {
     assert.equal(list.response.status, 200);
     assert.ok(Array.isArray(list.data.data));
 
-    const missingId = await findMissingPostId();
-    assert.equal((await request(`/posts/${missingId}`)).response.status, 404);
     assert.equal((await request('/posts/not-an-id')).response.status, 404);
 
     const created = await request('/posts', 'POST', {
@@ -64,6 +62,14 @@ async function main() {
     assert.equal(created.response.status, 201);
     assert.equal(created.data.data.authorId, author.id);
     const postId = created.data.data.id;
+
+    const updatedList = await request('/posts');
+    assert.equal(updatedList.response.status, 200);
+    assert.ok(updatedList.data.data.some((post) => post.id === postId));
+
+    const missingId = await findMissingPostId();
+    assert.notEqual(missingId, postId);
+    assert.equal((await request(`/posts/${missingId}`)).response.status, 404);
 
     const read = await request(`/posts/${postId}`);
     assert.equal(read.response.status, 200);
@@ -80,7 +86,11 @@ async function main() {
     assert.equal((await request(`/posts/${postId}`, 'DELETE')).response.status, 204);
     assert.equal((await request(`/posts/${postId}`)).response.status, 404);
 
-    for (const invalidAuthorId of [undefined, 0, -1, 1.5, 'not-an-id', 2147483648]) {
+    const missingTitle = await request('/posts', 'POST', { authorId: author.id });
+    assert.equal(missingTitle.response.status, 422);
+    assert.equal(missingTitle.data.error, 'Title is required');
+
+    for (const invalidAuthorId of [undefined, null, '', 0, -1, 1.5, '1', 'not-an-id', 2147483648]) {
       const body = { title: 'Invalid author verification' };
       if (invalidAuthorId !== undefined) body.authorId = invalidAuthorId;
       const invalid = await request('/posts', 'POST', body);
